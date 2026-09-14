@@ -3,6 +3,8 @@ import { SecureAPI } from '../lib/secureApi';
 
 interface RevenueData {
     property_id: string;
+    year: number;
+    month: number;
     total_revenue: number;
     currency: string;
     reservations_count: number;
@@ -10,11 +12,16 @@ interface RevenueData {
 
 interface RevenueSummaryProps {
     propertyId?: string;
+    year: number;
+    month: number;
     debugTenant?: string; 
     showRaw?: boolean;
 }
 
-export const RevenueSummary: React.FC<RevenueSummaryProps> = ({ propertyId = 'prop-001', debugTenant, showRaw }) => {
+const formatPeriod = (year: number, month: number) =>
+    new Date(year, month - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+export const RevenueSummary: React.FC<RevenueSummaryProps> = ({ propertyId = 'prop-001', year, month, debugTenant, showRaw }) => {
     const [data, setData] = useState<RevenueData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -28,11 +35,14 @@ export const RevenueSummary: React.FC<RevenueSummaryProps> = ({ propertyId = 'pr
                 // Use SecureAPI to handle authentication automatically
                 // We pass the simulatedTenant option which SecureAPI will attach as a header
                 const response = await SecureAPI.getDashboardSummary(propertyId, {
+                    year,
+                    month,
                     simulatedTenant: activeTenant,
                     timestamp: Date.now()
                 });
                 setData(response);
             } catch (err) {
+                setData(null);
                 setError('Failed to load revenue data');
                 console.error(err);
             } finally {
@@ -41,7 +51,7 @@ export const RevenueSummary: React.FC<RevenueSummaryProps> = ({ propertyId = 'pr
         };
 
         fetchRevenue();
-    }, [propertyId, activeTenant]);
+    }, [propertyId, year, month, activeTenant]);
 
     if (loading) {
         return (
@@ -76,6 +86,7 @@ export const RevenueSummary: React.FC<RevenueSummaryProps> = ({ propertyId = 'pr
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Revenue</h2>
+                        <p className="text-xs text-gray-400 mt-0.5">{formatPeriod(data.year, data.month)}</p>
                         <div className="flex items-baseline gap-2 mt-1">
                             <span className="text-3xl font-bold text-gray-900 tracking-tight">
                                 {data.currency} {displayTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
