@@ -1,5 +1,5 @@
 # Developer Assignment: Property Revenue Dashboard
-
+https://www.loom.com/share/47cb1462a53d4500b57dbb859eb82035
 ## Background
 
 You've joined our property management team as a junior developer. Our company manages properties for multiple clients across different time zones, and we've recently launched a new revenue dashboard system.
